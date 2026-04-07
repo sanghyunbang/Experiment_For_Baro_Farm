@@ -1,0 +1,64 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+    id 'com.diffplug.spotless'
+    id 'checkstyle'
+}
+
+ext {
+    set('springCloudVersion', "2025.0.0")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+dependencies {
+    implementation project(':apps:baro-common')
+
+    // 공통
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // 테스트
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // User 서비스
+    implementation 'org.springframework.boot:spring-boot-starter-web'       // Servlet, MVC
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'  // JPA, 트랜잭션
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'  // health, metrics
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'   // Config Server 클라이언트
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    // 메일
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+    // DB
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // 보안 테스트
+    // testImplementation 'org.springframework.security:spring-security-test'
+}
+bootJar {
+    enabled = true
+    mainClass = 'com.barofarm.user.UserApplication'
+}
+
+jar {
+    enabled = false
+}

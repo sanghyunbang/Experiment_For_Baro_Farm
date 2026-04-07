@@ -1,0 +1,77 @@
+{
+    "rules_by_id":  {
+                        "auth:auth-me":  {
+                                             "name":  "auth:auth-me",
+                                             "path":  "^(/auth-service)?/api/v1/auth/me$",
+                                             "methods":  [
+                                                             "GET"
+                                                         ],
+                                             "roles":  [
+                                                           "CUSTOMER",
+                                                           "SELLER",
+                                                           "ADMIN"
+                                                       ]
+                                         },
+                        "auth:auth-withdraw":  {
+                                                   "name":  "auth:auth-withdraw",
+                                                   "path":  "^(/auth-service)?/api/v1/auth/me/withdraw$",
+                                                   "methods":  [
+                                                                   "POST"
+                                                               ],
+                                                   "roles":  [
+                                                                 "CUSTOMER",
+                                                                 "SELLER",
+                                                                 "ADMIN"
+                                                             ]
+                                               },
+                        "auth:auth-password-change":  {
+                                                          "name":  "auth:auth-password-change",
+                                                          "path":  "^(/auth-service)?/api/v1/auth/password/change$",
+                                                          "methods":  [
+                                                                          "POST"
+                                                                      ],
+                                                          "roles":  [
+                                                                        "CUSTOMER",
+                                                                        "SELLER",
+                                                                        "ADMIN"
+                                                                    ]
+                                                      },
+                        "auth:oauth-link-start":  {
+                                                     "name":  "auth:oauth-link-start",
+                                                     "path":  "^(/auth-service)?/api/v1/auth/me/oauth/link/start$",
+                                                     "methods":  [
+                                                                     "POST"
+                                                                 ],
+                                                     "roles":  [
+                                                                   "CUSTOMER",
+                                                                   "SELLER",
+                                                                   "ADMIN"
+                                                               ]
+                                                 },
+                        "auth:oauth-link-callback":  {
+                                                        "name":  "auth:oauth-link-callback",
+                                                        "path":  "^(/auth-service)?/api/v1/auth/oauth/link/callback$",
+                                                        "methods":  [
+                                                                        "POST"
+                                                                    ],
+                                                        "roles":  [
+                                                                      "CUSTOMER",
+                                                                      "SELLER",
+                                                                      "ADMIN"
+                                                                  ]
+                                               }
+                    },
+    "index":  {
+                  "method":  {
+                                 "GET":  [
+                                             "auth:auth-me"
+                                         ],
+                                 "POST":  [
+                                              "auth:auth-withdraw",
+                                              "auth:auth-password-change",
+                                              "auth:oauth-link-start",
+                                              "auth:oauth-link-callback"
+                                          ]
+                            }
+              }
+}

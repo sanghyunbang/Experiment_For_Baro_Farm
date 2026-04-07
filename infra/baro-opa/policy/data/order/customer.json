@@ -1,0 +1,67 @@
+{
+    "rules_by_id":  {
+                        "order:orders-list":  {
+                                                  "name":  "order:orders-list",
+                                                  "path":  "^(/order-service)?/api/v1/orders$",
+                                                  "methods":  [
+                                                                  "GET"
+                                                              ],
+                                                  "roles":  [
+                                                                "CUSTOMER",
+                                                                "SELLER",
+                                                                "ADMIN"
+                                                            ]
+                                              },
+                        "order:orders-create":  {
+                                                    "name":  "order:orders-create",
+                                                    "path":  "^(/order-service)?/api/v1/orders$",
+                                                    "methods":  [
+                                                                    "POST"
+                                                                ],
+                                                    "roles":  [
+                                                                  "CUSTOMER",
+                                                                  "SELLER",
+                                                                  "ADMIN"
+                                                              ],
+                                                    "deny_flags":  [
+                                                                       "ORDER_BLOCKED"
+                                                                   ]
+                                                },
+                        "order:order-detail":  {
+                                                   "name":  "order:order-detail",
+                                                   "path":  "^(/order-service)?/api/v1/orders/[^/]+$",
+                                                   "methods":  [
+                                                                   "GET"
+                                                               ],
+                                                   "roles":  [
+                                                                 "CUSTOMER",
+                                                                 "SELLER",
+                                                                 "ADMIN"
+                                                             ]
+                                               },
+                        "order:order-cancel":  {
+                                                   "name":  "order:order-cancel",
+                                                   "path":  "^(/order-service)?/api/v1/orders/[^/]+/cancel$",
+                                                   "methods":  [
+                                                                   "POST"
+                                                               ],
+                                                   "roles":  [
+                                                                 "CUSTOMER",
+                                                                 "SELLER",
+                                                                 "ADMIN"
+                                                             ]
+                                               }
+                    },
+    "index":  {
+                  "method":  {
+                                 "GET":  [
+                                             "order:orders-list",
+                                             "order:order-detail"
+                                         ],
+                                 "POST":  [
+                                              "order:orders-create",
+                                              "order:order-cancel"
+                                          ]
+                             }
+              }
+}

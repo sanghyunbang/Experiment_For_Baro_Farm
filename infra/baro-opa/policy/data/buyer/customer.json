@@ -1,0 +1,23 @@
+{
+    "rules_by_id":  {
+                        "buyer:carts":  {
+                                            "name":  "buyer:carts",
+                                            "path":  "^(/buyer-service)?/api/v1/carts(?:/.*)?$",
+                                            "methods":  [
+                                                            "*"
+                                                        ],
+                                            "roles":  [
+                                                          "CUSTOMER",
+                                                          "SELLER",
+                                                          "ADMIN"
+                                                      ]
+                                        }
+                    },
+    "index":  {
+                  "method":  {
+                                 "*":  [
+                                           "buyer:carts"
+                                       ]
+                             }
+              }
+}

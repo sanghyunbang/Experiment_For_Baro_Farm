@@ -1,0 +1,8 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+
+opa:
+  bundle:
+    policy-dir: ${OPA_POLICY_DIR:../../infra/baro-opa/policy}

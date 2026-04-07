@@ -1,0 +1,13 @@
+﻿server:
+  port: ${SERVER_PORT:8087}
+
+api:
+  v1: /api/v1
+
+spring:
+  application:
+    name: user-service
+  config:
+    import: ${SPRING_CONFIG_IMPORT:optional:configserver:http://localhost:1}
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}

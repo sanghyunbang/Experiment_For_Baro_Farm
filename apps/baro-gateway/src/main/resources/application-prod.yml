@@ -1,0 +1,164 @@
+spring:
+  config:
+    import: optional:configserver:http://localhost:1
+  http:
+    codecs:
+      max-in-memory-size: 2MB
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:${REDIS_HOST:redis}}
+      port: ${SPRING_DATA_REDIS_PORT:${REDIS_PORT:6379}}
+      password: ${SPRING_DATA_REDIS_PASSWORD:${REDIS_PASSWORD:}}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+        shutdown-timeout: 100ms
+  cloud:
+    gateway:
+      server:
+        webflux:
+          metrics:
+            enabled: true
+          httpclient:
+            connect-timeout: 5000
+            response-timeout: 5s
+            wiretap: false
+            pool:
+              type: elastic
+              maxConnections: 200
+              acquireTimeout: 2000
+              maxIdleTime: 30s
+              maxLifeTime: 300s
+              pendingAcquireMaxCount: 500
+              metrics: true
+          httpserver:
+            max-header-size: 16KB
+            max-initial-line-length: 8KB
+            max-chunk-size: 8KB
+            wiretap: false
+          default-filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 50
+                redis-rate-limiter.burstCapacity: 100
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@gatewayKeyResolver}"
+            - name: Retry
+              args:
+                retries: 2
+                methods: GET
+                statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE,GATEWAY_TIMEOUT
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
+                  basedOnPreviousValue: true
+          discovery:
+            locator:
+              enabled: false
+              lower-case-service-id: true
+          globalcors:
+            corsConfigurations:
+              '[/**]':
+                allowedOrigins:
+                  - ${GATEWAY_ALLOWED_ORIGIN_0:http://localhost:3000}
+                  - ${GATEWAY_ALLOWED_ORIGIN_1:http://3.34.14.73:3000}
+                allowedMethods: "*"
+                allowedHeaders: "*"
+                allowCredentials: true
+                maxAge: 3600
+          routes:
+            - id: user-service-route
+              uri: lb://user-service
+              predicates:
+                - Path=/user-service/**
+              filters:
+                - RewritePath=/user-service/(?<seg>.*), /${seg}
+                - name: CircuitBreaker
+                  args:
+                    name: gatewayCircuitBreaker
+                    fallbackUri: forward:/fallback
+
+            - id: shopping-service-route
+              uri: lb://sample-shopping
+              predicates:
+                - Path=/shopping-service/**
+              filters:
+                - RewritePath=/shopping-service/(?<seg>.*), /${seg}
+                - Authentication
+                - OpaAuthorization
+                - name: CircuitBreaker
+                  args:
+                    name: gatewayCircuitBreaker
+                    fallbackUri: forward:/fallback
+
+eureka:
+  client:
+    enabled: ${EUREKA_CLIENT_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+opa:
+  enabled: ${OPA_ENABLED:true}
+  fail-open: ${FAIL_OPEN:false}
+  url: ${OPA_URL:http://opa:8181}
+  authz-path: ${OPA_AUTHZ_PATH:/v1/data/gateway/authz/allow}
+  timeout-ms: ${OPA_TIMEOUT_MS:2000}
+
+rate-limit:
+  enabled: ${RATE_LIMIT_ENABLED:true}
+
+jwt:
+  secret: ${JWT_SECRET:change_me_to_a_secure_secret_at_least_32_chars}
+
+management:
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  endpoints:
+    web:
+      exposure:
+        include: health, info, gateway, metrics, prometheus
+  health:
+    redis:
+      enabled: false
+    show-details: when-authorized
+    show-components: when-authorized
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      gatewayCircuitBreaker:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 50
+        minimumNumberOfCalls: 20
+        failureRateThreshold: 50
+        slowCallRateThreshold: 50
+        slowCallDurationThreshold: 2s
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 10
+      opaAuthz:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 30
+        minimumNumberOfCalls: 10
+        failureRateThreshold: 50
+        slowCallRateThreshold: 50
+        slowCallDurationThreshold: 1s
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 5
+  bulkhead:
+    instances:
+      opaAuthz:
+        maxConcurrentCalls: 50
+        maxWaitDuration: 0
+
+logging:
+  level:
+    com.barofarm.gateway.filter: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: INFO

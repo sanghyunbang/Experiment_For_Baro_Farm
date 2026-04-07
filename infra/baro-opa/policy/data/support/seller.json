@@ -1,0 +1,86 @@
+{
+    "rules_by_id":  {
+                        "support:deliveries-ship":  {
+                                                        "name":  "support:deliveries-ship",
+                                                        "path":  "^(/support-service)?/api/v1/deliveries/[^/]+/ship$",
+                                                        "methods":  [
+                                                                        "PATCH"
+                                                                    ],
+                                                        "roles":  [
+                                                                      "SELLER",
+                                                                      "ADMIN"
+                                                                  ]
+                                                    },
+                        "support:experiences-create":  {
+                                                           "name":  "support:experiences-create",
+                                                           "path":  "^(/support-service)?/api/v1/experiences$",
+                                                           "methods":  [
+                                                                           "POST"
+                                                                       ],
+                                                           "roles":  [
+                                                                         "SELLER",
+                                                                         "ADMIN"
+                                                                     ],
+                                                           "deny_flags":  [
+                                                                              "PRODUCT_PUBLISH_BLOCKED"
+                                                                          ]
+                                                       },
+                        "support:experiences-update-delete":  {
+                                                                  "name":  "support:experiences-update-delete",
+                                                                  "path":  "^(/support-service)?/api/v1/experiences/[^/]+$",
+                                                                  "methods":  [
+                                                                                  "PUT",
+                                                                                  "DELETE"
+                                                                              ],
+                                                                  "roles":  [
+                                                                                "SELLER",
+                                                                                "ADMIN"
+                                                                            ],
+                                                                  "deny_flags":  [
+                                                                                     "PRODUCT_PUBLISH_BLOCKED"
+                                                                                 ]
+                                                              },
+                        "support:experiences-my-farm":  {
+                                                            "name":  "support:experiences-my-farm",
+                                                            "path":  "^(/support-service)?/api/v1/experiences/my-farm$",
+                                                            "methods":  [
+                                                                            "GET"
+                                                                        ],
+                                                            "roles":  [
+                                                                          "SELLER",
+                                                                          "ADMIN"
+                                                                      ]
+                                                        },
+                        "support:reservations-status":  {
+                                                            "name":  "support:reservations-status",
+                                                            "path":  "^(/support-service)?/api/v1/reservations/[^/]+/status$",
+                                                            "methods":  [
+                                                                            "PUT"
+                                                                        ],
+                                                            "roles":  [
+                                                                          "SELLER",
+                                                                          "ADMIN"
+                                                                      ]
+                                                        }
+                    },
+    "index":  {
+                  "method":  {
+                                 "PATCH":  [
+                                               "support:deliveries-ship"
+                                           ],
+                                 "GET":  [
+                                             "support:experiences-my-farm"
+                                         ],
+                                 "POST":  [
+                                              "support:experiences-create"
+                                          ],
+                                 "PUT":  [
+                                             "support:experiences-update-delete",
+                                             "support:reservations-status"
+                                         ],
+                                 "DELETE":  [
+                                                "support:experiences-update-delete"
+                                            ]
+                             }
+              }
+}

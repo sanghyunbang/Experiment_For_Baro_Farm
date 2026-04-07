@@ -1,0 +1,42 @@
+services:
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: exp-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../infra/observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - exp-net
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: exp-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ../infra/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../infra/observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - exp-net
+
+volumes:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  exp-net:
+    external: true
+    name: exp-net

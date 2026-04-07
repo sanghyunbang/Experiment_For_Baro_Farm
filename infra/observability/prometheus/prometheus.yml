@@ -1,0 +1,33 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["prometheus:9090"]
+
+  - job_name: gateway
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ["gateway:8080"]
+
+  - job_name: sample-shopping
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ["sample-shopping:8082"]
+
+  - job_name: baro-user
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ["baro-user:8080"]
+
+  - job_name: opa-bundle
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ["opa-bundle:8095"]
+
+  - job_name: eureka
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ["eureka:8761"]

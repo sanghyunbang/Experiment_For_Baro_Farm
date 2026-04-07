@@ -1,0 +1,65 @@
+{
+    "rules_by_id":  {
+                        "support:experiences-list":  {
+                                                         "name":  "support:experiences-list",
+                                                         "path":  "^(/support-service)?/api/v1/experiences$",
+                                                         "methods":  [
+                                                                         "GET"
+                                                                     ],
+                                                         "roles":  [
+                                                                       "*"
+                                                                   ]
+                                                     },
+                        "support:experiences-detail":  {
+                                                           "name":  "support:experiences-detail",
+                                                           "path":  "^(/support-service)?/api/v1/experiences/[^/]+$",
+                                                           "methods":  [
+                                                                           "GET"
+                                                                       ],
+                                                           "roles":  [
+                                                                         "*"
+                                                                     ]
+                                                       },
+                        "support:product-reviews-read":  {
+                                                             "name":  "support:product-reviews-read",
+                                                             "path":  "^(/support-service)?/api/v1/products/[^/]+/reviews$",
+                                                             "methods":  [
+                                                                             "GET"
+                                                                         ],
+                                                             "roles":  [
+                                                                           "*"
+                                                                       ]
+                                                         },
+                        "support:reviews-read":  {
+                                                     "name":  "support:reviews-read",
+                                                     "path":  "^(/support-service)?/api/v1/reviews/[^/]+$",
+                                                     "methods":  [
+                                                                     "GET"
+                                                                 ],
+                                                     "roles":  [
+                                                                   "*"
+                                                               ]
+                                                 },
+                        "support:deliveries-order":  {
+                                                         "name":  "support:deliveries-order",
+                                                         "path":  "^(/support-service)?/api/v1/deliveries/orders/[^/]+$",
+                                                         "methods":  [
+                                                                         "GET"
+                                                                     ],
+                                                         "roles":  [
+                                                                       "*"
+                                                                   ]
+                                                     }
+                    },
+    "index":  {
+                  "method":  {
+                                 "GET":  [
+                                             "support:experiences-list",
+                                             "support:experiences-detail",
+                                             "support:product-reviews-read",
+                                             "support:reviews-read",
+                                             "support:deliveries-order"
+                                         ]
+                             }
+              }
+}

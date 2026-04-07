@@ -1,0 +1,23 @@
+{
+    "rules_by_id":  {
+                        "seller:seller-apply":  {
+                                                    "name":  "seller:seller-apply",
+                                                    "path":  "^(/seller-service)?/api/v1/sellers/apply$",
+                                                    "methods":  [
+                                                                    "POST"
+                                                                ],
+                                                    "roles":  [
+                                                                  "CUSTOMER",
+                                                                  "SELLER",
+                                                                  "ADMIN"
+                                                              ]
+                                                }
+                    },
+    "index":  {
+                  "method":  {
+                                 "POST":  [
+                                              "seller:seller-apply"
+                                          ]
+                             }
+              }
+}

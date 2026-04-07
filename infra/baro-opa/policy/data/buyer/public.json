@@ -1,0 +1,67 @@
+{
+    "rules_by_id":  {
+                        "buyer:products-list":  {
+                                                    "name":  "buyer:products-list",
+                                                    "path":  "^(/buyer-service)?/api/v1/products$",
+                                                    "methods":  [
+                                                                    "GET"
+                                                                ],
+                                                    "roles":  [
+                                                                  "*"
+                                                              ]
+                                                },
+                        "buyer:products-detail":  {
+                                                      "name":  "buyer:products-detail",
+                                                      "path":  "^(/buyer-service)?/api/v1/products/[^/]+$",
+                                                      "methods":  [
+                                                                      "GET"
+                                                                  ],
+                                                      "roles":  [
+                                                                    "*"
+                                                                ]
+                                                  },
+                        "buyer:categories-list":  {
+                                                      "name":  "buyer:categories-list",
+                                                      "path":  "^(/buyer-service)?/api/v1/categories$",
+                                                      "methods":  [
+                                                                      "GET"
+                                                                  ],
+                                                      "roles":  [
+                                                                    "*"
+                                                                ]
+                                                  },
+                        "buyer:inventories-list":  {
+                                                       "name":  "buyer:inventories-list",
+                                                       "path":  "^(/buyer-service)?/api/v1/inventories$",
+                                                       "methods":  [
+                                                                       "GET"
+                                                                   ],
+                                                       "roles":  [
+                                                                     "*"
+                                                                 ]
+                                                   },
+                        "buyer:carts":  {
+                                            "name":  "buyer:carts",
+                                            "path":  "^(/buyer-service)?/api/v1/carts(?:/.*)?$",
+                                            "methods":  [
+                                                            "*"
+                                                        ],
+                                            "roles":  [
+                                                          "*"
+                                                      ]
+                                        }
+                    },
+    "index":  {
+                  "method":  {
+                                 "GET":  [
+                                             "buyer:products-list",
+                                             "buyer:products-detail",
+                                             "buyer:categories-list",
+                                             "buyer:inventories-list"
+                                         ],
+                                 "*":  [
+                                           "buyer:carts"
+                                         ]
+                             }
+              }
+}

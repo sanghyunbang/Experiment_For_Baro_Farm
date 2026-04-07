@@ -35,3 +35,11 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### 환경설정
+.env
+
+### Runtime logs
+*.log
+logs/
+**/logs/
