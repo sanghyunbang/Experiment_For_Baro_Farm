@@ -1,0 +1,179 @@
+services:
+
+  eureka:
+    build:
+      context: ..
+      dockerfile: docker/baro-eureka/Dockerfile
+    container_name: exp-eureka
+    environment:
+      SERVER_PORT: 8761
+      EUREKA_INSTANCE_HOSTNAME: eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - exp-net
+
+  mysql:
+    image: mysql:8.0
+    container_name: exp-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ../infra/mysql/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 20s
+    networks:
+      - exp-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: exp-redis
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    networks:
+      - exp-net
+
+  kafka:
+    image: bitnamilegacy/kafka:4.0.0-debian-12-r10
+    container_name: exp-kafka
+    environment:
+      KAFKA_CFG_NODE_ID: 0
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    networks:
+      - exp-net
+
+  opa-bundle:
+    build:
+      context: ..
+      dockerfile: docker/baro-opa-bundle/Dockerfile
+    container_name: exp-opa-bundle
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_CONFIG_IMPORT: optional:configserver:http://localhost:1
+      SERVER_PORT: 8095
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      OPA_HOTLIST_TOPIC: opa-hotlist-events
+      OPA_POLICY_DIR: /workspace/infra/baro-opa/policy
+      EUREKA_CLIENT_ENABLED: "true"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+    ports:
+      - "8095:8095"
+    depends_on:
+      - eureka
+      - kafka
+    networks:
+      - exp-net
+
+  opa:
+    build:
+      context: ..
+      dockerfile: docker/baro-opa/Dockerfile
+    container_name: exp-opa
+    ports:
+      - "8181:8181"
+    depends_on:
+      - opa-bundle
+    networks:
+      - exp-net
+
+  baro-user:
+    build:
+      context: ..
+      dockerfile: docker/baro-user/Dockerfile
+    container_name: exp-user
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_CONFIG_IMPORT: optional:configserver:http://localhost:1
+      BARO_USER_JWT_SECRET: ${JWT_SECRET}
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      BARO_USER_OPA_HOTLIST_TOPIC: opa-hotlist-events
+      EUREKA_CLIENT_ENABLED: "true"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+    ports:
+      - "8081:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka:
+        condition: service_started
+      redis:
+        condition: service_started
+      kafka:
+        condition: service_started
+    networks:
+      - exp-net
+
+  sample-shopping:
+    build:
+      context: ..
+      dockerfile: docker/sample-shopping/Dockerfile
+    container_name: exp-sample-shopping
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      AUTH_MODE: ${AUTH_MODE}
+      EUREKA_CLIENT_ENABLED: "true"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+    ports:
+      - "8082:8082"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka:
+        condition: service_started
+    networks:
+      - exp-net
+
+  gateway:
+    build:
+      context: ..
+      dockerfile: docker/baro-gateway/Dockerfile
+    container_name: exp-gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      JWT_SECRET: ${JWT_SECRET}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      OPA_URL: ${OPA_BASE_URL}
+      OPA_ENABLED: ${OPA_ENABLED}
+      RATE_LIMIT_ENABLED: ${RATE_LIMIT_ENABLED}
+      FAIL_OPEN: ${FAIL_OPEN}
+      EUREKA_CLIENT_ENABLED: "true"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eureka
+      - redis
+      - opa
+      - baro-user
+      - sample-shopping
+    networks:
+      - exp-net
+
+networks:
+  exp-net:
+    name: exp-net
+    driver: bridge
